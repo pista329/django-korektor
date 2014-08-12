@@ -78,7 +78,7 @@ will return dictionary
  { your_input: It is fn to dence
    did_you_mean: It is fun to dance
    did_you_mean_markdown: It is *fun* to *dance*
-   did_you_mean_html: It is <i>fun</i> to <i>dance</i>}
+   did_you_mean_html: It is <i>fun</i> to <i>dance</i> }
 ```
 
 Please note
