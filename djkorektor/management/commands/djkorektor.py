@@ -39,50 +39,23 @@ class Timer:
 		self.end = time.time()
 		self.interval = self.end - self.start
 
+class DJKorektorException(Exception):
+	pass
+
 """
 	
-	Classical Damereau errors (1964) 
-	- Substitution 
+	Classical Damereau errors (1964):
+	
+	Substitution 
 		[ALPHABET] -> [ALPHSBET] 
-	- Deletion 
+	Deletion 
 		[ALPHABET] -> [ALPHBET] 
-	- Insertion 
+	Insertion 
 		[ALPHABET] -> [ALPHAABET] 
-	- Transposition 
+	Transposition 
 		[ALPHABET] -> [ALPHBAET] 
 		
-		F.J. Damereau
-
-"""
-
-
-"""
-	
-	
-	TEST CASES:
-	
-	# dovoz -> dovzo
-	SELECT *, COUNT(*) as ngrams_count, SUM(`ngram_perc`) as ngrams_weight FROM `djkorektor_words_bigrams` LEFT JOIN `djkorektor_words` ON (`djkorektor_words_bigrams`.`word_id` = `djkorektor_words`.`id`) WHERE 
-	(`ngram_sorted` IN ('do','ov', 'vz', 'oz') OR `ngram` IN ('do','ov', 'vz', 'zo')) AND `word_length` BETWEEN 4 AND 6 GROUP BY `word_id` ORDER BY ngrams_count DESC, ngrams_weight DESC;
-
-	# nove -> nvoe
-	SELECT *, COUNT(*) as ngrams_count, SUM(`ngram_perc`) as ngrams_weight FROM `djkorektor_words_bigrams` LEFT JOIN `djkorektor_words` ON (`djkorektor_words_bigrams`.`word_id` = `djkorektor_words`.`id`) WHERE 
-	(`ngram_sorted` IN ('nv','ov', 'éo') OR `ngram` IN ('^n','nv','vo', 'oé','é$')) AND `word_length` BETWEEN 3 AND 5 GROUP BY `word_id` ORDER BY ngrams_count DESC, ngrams_weight DESC;
-
-	# biele -> bielle
-	SELECT *, COUNT(*) as ngrams_count, SUM(`ngram_perc`) as ngrams_weight FROM `djkorektor_words_bigrams` LEFT JOIN `djkorektor_words` ON (`djkorektor_words_bigrams`.`word_id` = `djkorektor_words`.`id`) WHERE 
-	(`ngram_sorted` IN ('bi','ei', 'el', 'll', 'el') OR `ngram` IN ('^b','bi','ie', 'el', 'll', 'le', 'e$')) AND `word_length` BETWEEN 4 AND 6 GROUP BY `word_id` ORDER BY ngrams_count DESC, ngrams_weight DESC;
-
-	# biele -> bieele
-	SELECT *, COUNT(*) as ngrams_count, SUM(`ngram_perc`) as ngrams_weight FROM `djkorektor_words_bigrams` LEFT JOIN `djkorektor_words` ON (`djkorektor_words_bigrams`.`word_id` = `djkorektor_words`.`id`) WHERE 
-	(`ngram_sorted` IN ('bi','ei', 'el', 'el', 'ee') OR `ngram` IN ('^b','bi','ie', 'el', 'le', 'ee', 'e$')) AND `word_length` BETWEEN 4 AND 6 GROUP BY `word_id` ORDER BY ngrams_count DESC, ngrams_weight DESC;
-
-	# biele -> biee
-	SELECT *, COUNT(*) as ngrams_count, SUM(`ngram_perc`) as ngrams_weight FROM `djkorektor_words_bigrams` LEFT JOIN `djkorektor_words` ON (`djkorektor_words_bigrams`.`word_id` = `djkorektor_words`.`id`) WHERE 
-	(`ngram_sorted` IN ('bi','ei', 'ee') OR `ngram` IN ('^b','bi','ie', 'ee', 'e$')) AND `word_length` BETWEEN 4 AND 6 GROUP BY `word_id` ORDER BY ngrams_count DESC, ngrams_weight DESC;
-	
-	
-	
+						F.J. Damereau
 """
 
 class Command(BaseCommand):
@@ -107,11 +80,6 @@ class Command(BaseCommand):
 		"""
 	
 	option_list = BaseCommand.option_list + (
-		# make_option('--import',
-# 			action='store_true',
-# 			dest='import',
-# 			default=False,
-# 			help='Use import to run import from datasource'),
 		make_option('--do-import-file',
 			action='store',
 			dest='import-file',
@@ -276,7 +244,7 @@ class Command(BaseCommand):
 		ngram_total=len(bigrams)
 		self.save_bigrams_batch(bigrams,word_in_db)
 		if self.verbosity > 0:
-			print "Imported \"%s\" as set of %s" % (word,tuple(self.strtouni(ngram) for ngram in bigrams),)
+			self.stdout.write("Imported \"%s\" as set of %s" % (word,tuple(self.strtouni(ngram) for ngram in bigrams),))
 		pass
 
 	def do_spelling(self,query,locale):
@@ -313,17 +281,17 @@ class Command(BaseCommand):
 			sql = sql.replace("SELECT","SELECT `djkorektor_words`.`id`, `djkorektor_words`.`word`, `djkorektor_words`.`length`, `djkorektor_words`.`count`, `djkorektor_words`.`quality_index`,",1).replace("FROM `djkorektor_words_bigrams`","FROM `djkorektor_words_bigrams` LEFT JOIN `djkorektor_words` ON (`djkorektor_words_bigrams`.`word_id` = `djkorektor_words`.`id`)")
 			
 			if self.verbosity > 2:
-				print
-				print "Query for \"%s\":" % query_word
-				print sql % tuple(params)
+				self.stdout.write('')
+				self.stdout.write("Query for \"%s\":" % query_word)
+				self.stdout.write(sql % tuple(params))
 			
 			self.cursor.execute(sql, tuple(params))
 			matches = dictfetchall(self.cursor)
 			
 			if self.verbosity > 2:
-				print
-				print "Results for \"%s\":" % query_word
-				print matches
+				self.stdout.write('')
+				self.stdout.write("Results for \"%s\":" % query_word)
+				self.stdout.write(str(matches))
 			
 			for i,word in enumerate(matches):
 				matches[i]["word"] = matches[i].get("word","")
@@ -355,9 +323,11 @@ class Command(BaseCommand):
 		for i,query_word in enumerate(query_words):
 			try:
 				if query_word.lower() in words_correct:
-					raise
+					raise DJKorektorException("Exact match found, %s is correct." % query_word)
 				
 				db_rows = words_dbs.get(query_word,[])
+				if not len(db_rows):
+					raise DJKorektorException("Empty db results for query word %s" % query_word)
 				db_row = db_rows[0]
 				db_word = db_row["word"]
 				
@@ -367,22 +337,23 @@ class Command(BaseCommand):
 							db_word = row["word"]
 							break
 				
-				if query_word.lower() == db_word.lower() or not db_word:
-					raise
+				if query_word.lower() == db_word.lower():
+					raise DJKorektorException("Exact match found through bigrams, %s is correct." % query_word)
+					
 				if query_word.isupper(): db_word = db_word.upper()
 				elif query_word.islower(): db_word = db_word.lower()
 				elif query_word.istitle(): db_word = db_word.title()
 				did_you_mean.append(db_word+query_separators[i])
 				did_you_mean_markdown.append((u"*%s*" % db_word)+query_separators[i])
 				did_you_mean_html.append((u"<i>%s</i>" % db_word)+query_separators[i])
-			except Exception,e:
+			except DJKorektorException,e:
 				# TOTO raise and catch custom exceptions 
 				# preserve word from input
 				did_you_mean.append(query_word+query_separators[i])
 				did_you_mean_markdown.append(query_word+query_separators[i])
 				did_you_mean_html.append(query_word+query_separators[i])
 		
-		did_you_mean = "".join(did_you_mean) # TODO preserve separators - query_separators
+		did_you_mean = "".join(did_you_mean)
 		did_you_mean_markdown = "".join(did_you_mean_markdown)
 		did_you_mean_html = "".join(did_you_mean_html)
 		output = OrderedDict()
@@ -391,12 +362,11 @@ class Command(BaseCommand):
 		output["did_you_mean_markdown"] = did_you_mean_markdown
 		output["did_you_mean_html"] = did_you_mean_html
 		
-		if self.verbosity > 0:
-			print 
-			print "Result:"
-			for i,k in output.items():
-				print "   '%s': %s" % (i,k.encode("utf-8",errors="replace"),)
-			print
+		self.stdout.write('') 
+		self.stdout.write("Result:")
+		for i,k in output.items():
+			self.stdout.write("   '%s': %s" % (i,k.encode("utf-8",errors="replace"),))
+		self.stdout.write('')
 		
 		return output
 		pass
