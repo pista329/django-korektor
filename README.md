@@ -29,11 +29,11 @@ Example use:
 ---
 Learning from command line:
 
-``$ python manage.py djkorektor --do-import-word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US``
+```sh $ python manage.py djkorektor --do-import-word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US```
 
 Spellcheck test from command line:
 
-``$ python manage.py djkorektor --do-spell="It is fn to dence" --locale=en_US``
+```sh $ python manage.py djkorektor --do-spell="It is fn to dence" --locale=en_US```
 
 Please note
 ---
