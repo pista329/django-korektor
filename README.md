@@ -27,9 +27,16 @@ For example: "Spellcheck" broken down to bigrams will result in [Sp, pe, el, ll,
 
 Example use:
 ---
-``./manage.py djkorektor --do-import-word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US``
+Learning from command line:
+
+``python manage.py djkorektor --do-import-word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US``
+
+Spellcheck test from command line:
+
+``python manage.py djkorektor --do-spell="It is fn to dence" --locale=en_US``
 
 Please note
 ---
 - Django Korektor can't fix a word if you did't learned it. Basically you need to import huge language specific dataset of correct phrases. For example a lot of newspaper articles (by constant learning from any rss feed). 
 - Django Korektor will only fix certain misspells between words. For example "It is fan to dance" will result as correct phrase.
+- Django Korektor usage of context is limited. For example "Icland is icland" will somehow result in "Iceland is iceland"
