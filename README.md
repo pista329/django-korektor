@@ -60,18 +60,18 @@ Example use
 Learning from command line:
 
 ```sh 
-$ python manage.py djkorektor --do-import-word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US
+$ python manage.py djkorektor --import_word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US
 ```
 
 Spellcheck test from command line:
 
 ```sh 
-$ python manage.py djkorektor --do-spell="It is fn to dence" --locale=en_US
+$ python manage.py djkorektor --spell="It is fn to dence" --locale=en_US
 ```
 Spellcheck from your app using management command in view:
 ```sh
 from django.core.management import call_command
-spellchecked = call_command('djkorektor',locale="en_US",do_spell="It is fn to dence")
+spellchecked = call_command('djkorektor',locale="en_US",spell="It is fn to dence")
 ```
 will return dictionary
 ```sh
