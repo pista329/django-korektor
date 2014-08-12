@@ -75,24 +75,24 @@ class Command(BaseCommand):
 	help = """This is *djkorektor* management command. Import your spellcheck learning datasets (huge chunks of texts) or import standalone words or test spelling suggestions.
     
     Example usage: 
-    ./manage.py djkorektor --do-import-word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US
-    ./manage.py djkorektor --do-spell="It is fn to dnce" --locale=en_US
+    ./manage.py djkorektor --import_word="Bigrams are fun! It is raining, let's dance together. It will be my pleasure." --locale=en_US
+    ./manage.py djkorektor --spell="It is fn to dnce" --locale=en_US
 		"""
 	
 	option_list = BaseCommand.option_list + (
-		make_option('--do-import-file',
+		make_option('--import_file',
 			action='store',
-			dest='import-file',
+			dest='import_file',
 			default=None,
 			type=str,
 			help='Learning from plain text file.'),
-		make_option('--do-import-word',
+		make_option('--import_word',
 			action='store',
-			dest='import-word',
+			dest='import_word',
 			default=None,
 			#type=unicode,
 			help='Learning of single word or sentence.'),
-		make_option('--do-spell',
+		make_option('--spell',
 			action='store',
 			dest='spell',
 			default=None,
@@ -438,16 +438,17 @@ class Command(BaseCommand):
 		# TODO brat do uvahy slovnikovost... zvysit percentualnu vahu
 		# TODO slova s pomlckou indexovat aj bez a teda oddelene
 		# TODO replace table names with meta settings - model_instance._meta.db_table
+		# TODO fix spojene slova ktore by sme mali rozdelit
 		
-		if options["import-word"]:
+		if options["import_word"]:
 			with Timer() as t:
-				self.do_import_word(unicode(options["import-word"],encoding="utf-8"),self.locale)
+				self.do_import_word(unicode(options["import_word"],encoding="utf-8"),self.locale)
 			if self.verbosity > 1:
 				self.stdout.write('')
 				self.stdout.write('Word import took %.03f sec.' % t.interval)
-		if options["import-file"]:
+		if options["import_file"]:
 			with Timer() as t:
-				self.do_import_file(options["import-file"],self.locale)
+				self.do_import_file(options["import_file"],self.locale)
 			if self.verbosity > 1:
 				self.stdout.write('')
 				self.stdout.write('Import file took %.03f sec.' % t.interval)
