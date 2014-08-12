@@ -73,6 +73,13 @@ Spellcheck from your app using management command in view:
 from django.core.management import call_command
 spellchecked = call_command('djkorektor',locale="en_US",do_spell="It is fn to dence")
 ```
+will return dictionary
+```sh
+ { your_input: It is fn to dence
+   did_you_mean: 'It is fun to dance
+   did_you_mean_markdown: It is *fun* to *dance*
+   did_you_mean_html: It is <i>fun</i> to <i>dance</i>}
+```
 
 Please note
 ---
