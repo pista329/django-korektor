@@ -5,7 +5,7 @@ Django Korektor is a brigam based "Did you mean?" proof of concept.
 
 > Have you ever heard about Google's "Did you mean" feature? Django Korektor is a simplified proof of concept based od bigrams intersection between spellchecked query and database set.
 
-Django Korektor contains optimized database models. Learning management commands to import yoir huge language datasets and finally test spellcheck. It finds closest brigams match, corrects and preserves any separators.
+Django Korektor contains optimized database models. Learning management commands to import your huge language datasets and finally test spellcheck. It finds closest bigrams match, corrects and preserves any separators. Database structure should be effecient enough for production use. (e.g. 5 word query checked over 1 million words in 0.3s on cheapest Digital Ocean droplet :)  
 
 Theory
 ---
