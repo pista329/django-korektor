@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django-korektor",
-    version='0.1.1',
+    version='0.1.4',
     url='http://github.com/pista329/django-korektor',
     author='Stefan Backor',
     author_email='stefan@backor.sk',
