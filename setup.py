@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 setup(
     name="django-korektor",
@@ -11,6 +14,7 @@ setup(
     description='Google like "Did you mean" '
                 'spellcheck proof of concept for Django app.',
     packages=find_packages(exclude='testapp'),
+    package_data={'':['*.sql']},
     install_requires=[
         'django>=1.6.5',
         'ordereddict>=1.0',
