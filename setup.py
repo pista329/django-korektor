@@ -7,21 +7,28 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 setup(
     name="django-korektor",
-    version='0.1.4',
+    version='0.1.5',
     url='http://github.com/pista329/django-korektor',
     author='Stefan Backor',
     author_email='stefan@backor.sk',
     description='Google like "Did you mean" '
                 'spellcheck proof of concept for Django app.',
-    packages=find_packages(exclude='testapp'),
+    packages=find_packages(),
     package_data={'':['*.sql']},
+    data_files=[('djkorektor/sql', [
+        'djkorektor/sql/bigram.sql',
+        'djkorektor/sql/locale.sql',
+        'djkorektor/sql/word.sql',
+        'djkorektor/sql/wordbigram.sql',
+        'djkorektor/sql/wordpair.sql',
+    ])],
     install_requires=[
         'django>=1.6.5',
         'ordereddict>=1.0',
         'unidecode>=0.04.9'
     ],
     license='MIT',
-    include_package_data=True,
+    #include_package_data=True,
     classifiers=[
         "Programming Language :: Python",
         'Programming Language :: Python :: 2.7',
